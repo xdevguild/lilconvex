@@ -6,7 +6,7 @@ edition = "2018"
 publish = false
 
 [lib]
-path = "src/empty.rs"
+path = "src/pool.rs"
 
 [dev-dependencies]
 num-bigint = "0.4.2"
