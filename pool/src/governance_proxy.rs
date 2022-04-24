@@ -9,6 +9,5 @@ pub trait GovernanceStaking {
         &self, 
         #[payment_token] payment_token: TokenIdentifier,
         #[payment_amount] payment_amount: BigUint,
-        timestamp: u64
-    ) -> SCResult<()>;
+    );
 }

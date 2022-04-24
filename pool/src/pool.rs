@@ -25,18 +25,16 @@ pub trait Pool {
     fn increase_amount(
         &self,
         #[payment_token] payment_token: TokenIdentifier,
-        #[payment_amount] payment_amount: BigUint,
-        timestamp: u64
-    ) -> SCResult<()> {
+        #[payment_amount] payment_amount: BigUint
+    ) {
         let governance_sc_address = self.governance_sc_address().get();
         self.governance_sc_proxy(governance_sc_address)
             .increase_amount(
                 payment_token,
-                payment_amount,
-                timestamp
+                payment_amount
             )
-            .transfer_execute();
-        Ok(())
+            .async_call()
+            .call_and_exit();
     }
 
     // storage

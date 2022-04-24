@@ -1,6 +1,6 @@
+import os
 import logging
 from pathlib import Path
-from argparse import ArgumentParser
 from erdpy import utils
 
 from erdpy.accounts import Account, Address
@@ -9,25 +9,26 @@ from erdpy.proxy.core import ElrondProxy
 
 logger = logging.getLogger("lilconvex")
 
-# current address: erd1qqqqqqqqqqqqqpgq9vslxy32tlanhhtdlx7th5dlhrtsum527fysf97t0h
+# current address: erd1qqqqqqqqqqqqqpgqffdmjd2de3757yl3pf2g0mydteuzzrn57fysjn2e97
 
 if __name__ == "__main__":
+    
+    """
+    python3 scripts/deploy.py 
+    """
 
     proxy_url = "https://testnet-gateway.elrond.com"
     
-    parser = ArgumentParser()
-    parser.add_argument("--pem", required=True)
-    args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
 
     proxy = ElrondProxy(proxy_url)
     network = proxy.get_network_config()
-    owner = Account(pem_file=args.pem)
+    owner = Account(pem_file=os.environ["PEM"])
 
     bytecode_path = Path("pool/output/pool.wasm").absolute()
     bytecode = utils.read_binary_file(bytecode_path).hex()
-    code_metadata = CodeMetadata(upgradeable=True)
+    code_metadata = CodeMetadata(upgradeable=True, payable=True)
     contract = SmartContract(bytecode=bytecode, metadata=code_metadata)
 
     owner.sync_nonce(proxy)
