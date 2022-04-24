@@ -5,3 +5,5 @@
 **/wallets/**
 **/erdpy.data-storage.json
 **/*.interaction.json
+
+.env
