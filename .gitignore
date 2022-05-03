@@ -6,4 +6,6 @@
 **/erdpy.data-storage.json
 **/*.interaction.json
 **/.vscode
-.env
+**/.env
+**/scripts
+**/elrond.workspace.json
