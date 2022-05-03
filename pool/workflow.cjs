@@ -1,7 +1,7 @@
 const { execFile } = require("child_process");
 const cron = require("node-cron");
 
-cron.schedule("* * * * *", () =>
+cron.schedule("*/30 * * * *", () =>
   execFile(__dirname + "/workflow.sh", (error, stdout, stderr) => {
     if (error) {
       console.error(`error: ${error.message}`);
@@ -12,7 +12,6 @@ cron.schedule("* * * * *", () =>
       console.error(`stderr: ${stderr}`);
       return;
     }
-
     console.log(`stdout:\n${stdout}`);
   })
 );
