@@ -37,7 +37,8 @@ if __name__ == "__main__":
 
     tx = contract.deploy(
         owner=owner,
-        arguments=["0x" + Address("erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta").hex()], # erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta -> 0x0000000000000000050060f0f33d5ac26b5b5978f4aeed6d0b0f0ada61ca9157 
+        arguments=["0x" + Address("erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta").hex(), #gov
+                   "0x" + Address("erd1qqqqqqqqqqqqqpgqaphkarlvclh2c3v0hq2em73gcuxkh5yxj9ts6s5dt2").hex()], #swap
         gas_price=network.min_gas_price,
         gas_limit=20000000,
         value=0,

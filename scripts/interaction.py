@@ -4,7 +4,7 @@ from pathlib import Path
 from erdpy import utils
 
 from erdpy.accounts import Account, Address
-from erdpy.contracts import CodeMetadata, SmartContract
+from erdpy.contracts import CodeMetadata, SmartContract, 
 from erdpy.proxy.core import ElrondProxy
 
 logger = logging.getLogger("lilconvex")
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     owner = Account(pem_file=os.environ["PEM"])
 
  #erd1qqqqqqqqqqqqqpgqkntm842lagcc2h0nyrynqd5f6ncpwdx07fyst5dmag
-    contract = SmartContract(address=Address("erd1qqqqqqqqqqqqqpgqffdmjd2de3757yl3pf2g0mydteuzzrn57fysjn2e97"))
+    contract = SmartContract(address=Address("erd1qqqqqqqqqqqqqpgq9menvfhd2ufdwexllrr4yrscudg0z4ma7fys3t40y8"))
 
     owner.sync_nonce(proxy)
 
@@ -35,8 +35,11 @@ if __name__ == "__main__":
 
     tx = contract.execute(
         caller=owner,
-        function="ESDTTransfer@4153482d373666303832@0de0b6b3a7640000@696e6372656173655f616d6f756e74",
-        arguments=[],
+        function="addLiquidity",
+        arguments=[
+            10, 
+            10,
+            EsdtTokenPayment ],
         gas_price=network.min_gas_price,
         gas_limit=20000000,
         value=0,

@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@elrondnetwork/erdjs": "^10.1.2",
+    "@elrondnetwork/erdjs-network-providers": "^0.1.5",
+    "@elrondnetwork/erdjs-walletcore": "^1.0.0",
+    "node-cron": "^3.0.0",
+    "path": "^0.12.7"
+  }
+}

@@ -7,6 +7,17 @@
 elrond_wasm_node::wasm_endpoints! {
     pool
     (
+        addLiquidityAndEnterFarm
+        addLiquidityAndEnterFarmWhenCompounding
+        claimRewardsInContract
+        compound
+        exchange
+        getA
+        getB
+        getFarmTokenAmount
+        getFarmTokenInfos
+        getRewardTokenInfos
+        harvest
         increaseAmount
     )
 }

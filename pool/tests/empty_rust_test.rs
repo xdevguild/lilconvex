@@ -1,6 +1,6 @@
 use elrond_wasm::types::Address;
 use elrond_wasm_debug::{rust_biguint, testing_framework::*, DebugApi};
-use pool::*;
+use lib::*;
 
 const WASM_PATH: &'static str = "output/empty.wasm";
 

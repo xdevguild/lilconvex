@@ -1,39 +1,43 @@
 {
-    "name": "pool",
-    "steps": [
-        {
-            "step": "setState",
-            "accounts": {
-                "address:owner": {
-                    "nonce": "1",
-                    "balance": "0"
-                }
-            },
-            "newAddresses": [
-                {
-                    "creatorAddress": "address:owner",
-                    "creatorNonce": "1",
-                    "newAddress": "sc:empty"
-                }
-            ]
-        },
-        {
-            "step": "scDeploy",
-            "txId": "deploy",
-            "tx": {
-                "from": "address:owner",
-                "contractCode": "file:../output/pool.wasm",
-                "arguments": [],
-                "gasLimit": "5,000,000",
-                "gasPrice": "0"
-            },
-            "expect": {
-                "out": [],
-                "status": "",
-                "logs": [],
-                "gas": "*",
-                "refund": "*"
-            }
+  "name": "pool",
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "1",
+          "balance": "1000",
+          "esdt": { "str:USDC-780dd8": "10,000", "str:USDT-7d8186": "10,000" }
         }
-    ]
+      },
+      "newAddresses": [
+        {
+          "creatorAddress": "address:owner",
+          "creatorNonce": "1",
+          "newAddress": "sc:pool"
+        }
+      ]
+    },
+    {
+      "step": "scDeploy",
+      "txId": "deploy",
+      "tx": {
+        "from": "address:owner",
+        "contractCode": "file:../output/pool.wasm",
+        "arguments": [
+          "address:erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta",
+          "address:erd1qqqqqqqqqqqqqpgqaphkarlvclh2c3v0hq2em73gcuxkh5yxj9ts6s5dt2"
+        ],
+        "gasLimit": "5,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "out": [],
+        "status": "",
+        "logs": [],
+        "gas": "*",
+        "refund": "*"
+      }
+    }
+  ]
 }

@@ -1,0 +1,52 @@
+{
+  "name": "liquidity",
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "1",
+          "balance": "1000",
+          "esdt": { "str:USDC-780dd8": "10,000", "str:USDT-7d8186": "10,000" }
+        },
+        "sc:pool": {
+          "code": "file:../output/pool.wasm",
+          "nonce": "1",
+          "balance": "1000",
+          "esdt": { "str:USDC-780dd8": "10,000", "str:USDT-7d8186": "10,000" }
+        }
+      }
+    },
+    {
+      "step": "scCall",
+      "txId": "addLiquidity",
+      "tx": {
+        "from": "address:owner",
+        "to": "sc:pool",
+        "esdtValue": [
+          {
+            "tokenIdentifier": "str:USDC-780dd8",
+            "nonce": "0",
+            "value": "10"
+          },
+          {
+            "tokenIdentifier": "str:USDT-7d8186",
+            "nonce": "0",
+            "value": "10"
+          }
+        ],
+        "function": "addLiquidity",
+        "arguments": ["10", "10"],
+        "gasLimit": "5,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "out": [],
+        "status": "",
+        "logs": [],
+        "gas": "*",
+        "refund": "*"
+      }
+    }
+  ]
+}
