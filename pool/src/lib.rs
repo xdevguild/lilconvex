@@ -38,7 +38,7 @@ pub trait CompoundContract {
 
         self.reward_token_infos().set_if_empty(
             &EsdtTokenPayment::new(
-                TokenIdentifier::from_esdt_bytes("ASH-76f082".as_bytes()),
+                ash_id,
                 0,
                 BigUint::zero()
             )
@@ -74,17 +74,15 @@ pub trait CompoundContract {
         // you receive the tokens only for AddingLiquidity 
         let payments = self.call_value().all_esdt_transfers();
         let first_payment_token = payments.get(0);
-        let second_payment_token = payments.get(0);
+        let second_payment_token = payments.get(1);
 
         // add liquidity to stableswap with USDC and USDT balance of the sc
         self.stableswap_contract(swap_sc)
             .add_liquidity(
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
+                self.blockchain().get_sc_balance(
                     &first_payment_token.token_identifier,
                     0),
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
+                self.blockchain().get_sc_balance(
                     &second_payment_token.token_identifier,
                     0),
                 self.sc().get())
