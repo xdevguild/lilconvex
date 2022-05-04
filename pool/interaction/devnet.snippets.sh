@@ -116,14 +116,38 @@ compoundUsdcUsdt() {
     --send || return
 }
 
+exitFarmBtc() {
+    
+     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+        --pem=${WALLET_PEM} \
+        --gas-limit=600000000 \
+        --proxy=${PROXY} --chain=${CHAIN} \
+        --function="exitFarm" \
+        --arguments $farm_btc \
+        --send || return
+}
+
+exitFarmUsdcUsdt() {
+    
+     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+        --pem=${WALLET_PEM} \
+        --gas-limit=600000000 \
+        --proxy=${PROXY} --chain=${CHAIN} \
+        --function="exitFarm" \
+        --arguments $farm_usdc_usdt \
+        --send || return
+}
+
 harvest() {
     # harvest all I got from the sc regarding the token_id and the nonce
+    # $1 nonce
+    id="0x$(echo -n 'FBW-1c60a3' | xxd -p -u | tr -d '\n')"
      erdpy --verbose contract call ${ADDRESS} --recall-nonce \
         --pem=${WALLET_PEM} \
         --gas-limit=600000000 \
         --proxy=${PROXY} --chain=${CHAIN} \
         --function="harvest" \
-        --arguments $ash_id $1 \
+        --arguments $id $1 \
         --send || return
 }
 

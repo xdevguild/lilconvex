@@ -12,6 +12,7 @@ elrond_wasm_node::wasm_endpoints! {
         claimRewardsInContract
         compound
         exchange
+        exitFarm
         getA
         getB
         getFarmTokenAmount

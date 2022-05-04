@@ -50,14 +50,17 @@ pub trait CompoundContract {
     fn harvest(
         &self,
         token_to_harvest: TokenIdentifier,
-        amount: BigUint
+        nonce: u64
     ) {
         self.send()
             .direct(
                 &self.blockchain().get_caller(),
                 &token_to_harvest,
-                0,
-                &amount,
+                nonce.clone(),
+                &self.blockchain().get_sc_balance(
+                    &token_to_harvest,
+                    nonce
+                ),
                 &[]
             );
     }
@@ -101,8 +104,7 @@ pub trait CompoundContract {
             EsdtTokenPayment::new(
                 lp_token_id,
                 0,
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
+                self.blockchain().get_sc_balance(
                     &lp_token_clone,
                     0
                 )
@@ -306,6 +308,29 @@ pub trait CompoundContract {
         // 4. add liquidity and enter farm
 
         self.add_liquidity_and_enter_farm_when_compounding(swap_sc, target_farm_sc, lp_token_id, token_out, token_to_receive);
+    }
+
+    #[endpoint(exitFarm)]
+    fn exit_farm(
+        &self,
+        farm_sc: ManagedAddress
+    ) {
+        // exit farm and receive ash in contract
+        let farm_token_infos = self.farm_token_infos(farm_sc.clone()).get();
+        let mut new_farm_token_infos = farm_token_infos.clone();
+        self.farm_contract(farm_sc.clone())
+            .exit_farm()
+            .add_token_transfer(
+                farm_token_infos.token_identifier,
+                farm_token_infos.token_nonce,
+                farm_token_infos.amount,
+            )
+            .execute_on_dest_context();
+        
+        // update the nonce to zero in order to trigger addLiquidityAndEnterFarm again
+        // new NFT data sender issue if not doing this
+        new_farm_token_infos.token_nonce = 0;
+        self.farm_token_infos(farm_sc).set(&new_farm_token_infos);
     }
 
     #[payable("*")]
