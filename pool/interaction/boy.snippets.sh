@@ -1,5 +1,5 @@
-WALLET_PEM="~/Elrond/pems/yum0e2.pem"
-MY_ADDRESS="erd1yq2v0rpt5h2lfa8ljkgu6mchrjvy6en3ywe2wfnnjun2rs4qu8nqalcfe5"
+WALLET_PEM="~/Elrond/pems/yum0e0.pem"
+MY_ADDRESS="erd1wx7h5rnyxre7avl5pkgj3c2fha9aknrwms8mspelfcapwvjac3vqncm7nm"
 
 PROXY="https://devnet-gateway.elrond.com"
 CHAIN="D"
@@ -12,16 +12,16 @@ BYTECODE="./output/pool.wasm"
 ###########################################
 GOV_ASHSWAP_SC="erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta"
 
-SWAP_BTC="erd1qqqqqqqqqqqqqpgq79zadfzu2gxdug2ztue6q6aa8xret9qszh0qzx5ncc" # OK
-SWAP_USDC_USDT="erd1qqqqqqqqqqqqqpgq392nv8mkrhwvkaff2qlqcd5yj8jeexpmzh0q4us968" #OK
-SWAP_USDC_WUSDC="erd1qqqqqqqqqqqqqpgqskct0n779lg9decdw6gvzcsx3xmxganezh0q5m8grk" # OK
+SWAP_BTC="erd1qqqqqqqqqqqqqpgqla72lhk8szfdh2l2nt9vflt803uz3prsrmcq2w885d" # OK
+SWAP_USDC_USDT="erd1qqqqqqqqqqqqqpgqzxcjxnxsw99lzdjqtcak5x8x39pkxkz0rmcqyl76wx" #OK
+SWAP_USDC_WUSDC="erd1qqqqqqqqqqqqqpgq9wj92y9sfw0dua57664hdc5gd656h95yrmcqtnqv5l" # OK
 
-FARM_BTC="erd1qqqqqqqqqqqqqpgqcx652pqh8fya2weavz253ttznaltyx4zzh0qw5t4dm" # NOT YETTTTTTTTTTTTTTTTTTT
-FARM_USDC_USDT="erd1qqqqqqqqqqqqqpgqze4g0hcvp9usk9kqvpdcaehqu7ycav5szh0qz8wur9" # OK
-FARM_USDC_WUSDC="erd1qqqqqqqqqqqqqpgqlaa4vmv6zcujzjrw2u0lqx8fy8hu45mlzh0qej9jya" # OK
+FARM_BTC="erd1qqqqqqqqqqqqqpgqsxwkxy0eqzm30zx0cd0shk47kg3fe4drrmcqhekhv7" # OK
+FARM_USDC_USDT="erd1qqqqqqqqqqqqqpgqjynk4kc89vhn8wg42fn6j6ny3t4k87nurmcqne35um" # OK
+FARM_USDC_WUSDC="erd1qqqqqqqqqqqqqpgqsn5d6l90xnml6gh3lr2d8gft5kjssx85rmcqlexapt" # OK
 
-PAIR_ASH_USDT="erd1qqqqqqqqqqqqqpgqp8mhm4dzt4vusdt2g36smup2f5vrtgrszh0qdpeqxx" # 
-PAIR_WBTC_USDC="erd1qqqqqqqqqqqqqpgqe3wfkwqm49jmfeehc6apl59h6rv2h29lzh0qsg3ey5" # OK
+PAIR_ASH_USDT="erd1qqqqqqqqqqqqqpgq9efzwnujjm6f75pccujr2jp4j5csym0vrmcqg9r3ff" # OK
+PAIR_WBTC_USDC="erd1qqqqqqqqqqqqqpgqkec4u8tkq4tztu30vvk889dnnddex5k8rmcqqnw6a4" # OK
 ###########################################
 
 sc="0x$(erdpy wallet bech32 --decode erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu)"
@@ -37,23 +37,23 @@ farm_usdc_wusdc="0x$(erdpy wallet bech32 --decode ${FARM_USDC_WUSDC})"
 pair_ash_usdt="0x$(erdpy wallet bech32 --decode ${SWAP_ASH_USDC})" 
 pair_wbtc_usdc="0x$(erdpy wallet bech32 --decode ${PAIR_ASH_USDC})" 
 ###########################################
-btc_id="0x$(echo -n 'RENBTC-8cd185' | xxd -p -u | tr -d '\n')" # OK
-wbtc_id="0x$(echo -n 'WBTC-027977' | xxd -p -u | tr -d '\n')" # OK
-usdc_id="0x$(echo -n 'USDC-fecc49' | xxd -p -u | tr -d '\n')" # OK
-wusdc_id="0x$(echo -n 'WUSDC-f93edf' | xxd -p -u | tr -d '\n')" # OK
-usdt_id="0x$(echo -n 'USDT-fedd98' | xxd -p -u | tr -d '\n')" # OK
-ash_id="0x$(echo -n 'ASH-f7c9ea' | xxd -p -u | tr -d '\n')" # OK
+btc_id="0x$(echo -n 'RENBTC-0b6973' | xxd -p -u | tr -d '\n')" # OK
+wbtc_id="0x$(echo -n 'WBTC-9bdb9b' | xxd -p -u | tr -d '\n')" # OK
+usdc_id="0x$(echo -n 'USDC-d5181d' | xxd -p -u | tr -d '\n')" # OK
+wusdc_id="0x$(echo -n 'WUSDC-3124eb' | xxd -p -u | tr -d '\n')" # OK
+usdt_id="0x$(echo -n 'USDT-a55fa7' | xxd -p -u | tr -d '\n')" # OK
+ash_id="0x$(echo -n 'ASH-4ce444' | xxd -p -u | tr -d '\n')" # OK
 
-lp_btc_id="0x$(echo -n 'LPT-0b4585' | xxd -p -u | tr -d '\n')" # OK
-lp_usdc_usdt_id="0x$(echo -n 'LPT-44f690' | xxd -p -u | tr -d '\n')" # OK
-lp_usdc_wusdc_id="0x$(echo -n 'LPT-8f1594' | xxd -p -u | tr -d '\n')" # OK
+lp_btc_id="0x$(echo -n 'LPT-8860c3' | xxd -p -u | tr -d '\n')" # OK
+lp_usdc_usdt_id="0x$(echo -n 'LPT-999601' | xxd -p -u | tr -d '\n')" # OK
+lp_usdc_wusdc_id="0x$(echo -n 'LPT-ea941a' | xxd -p -u | tr -d '\n')" # OK
 
 deploy() {
 
     erdpy --verbose contract deploy --bytecode=${BYTECODE} --recall-nonce --metadata-payable \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=400000000 \
+    --gas-limit=600000000 \
     --arguments $ash_id $gov_sc_address $sc \
     --send \
     --outfile="deploy-BoY.interaction.json" || return
@@ -74,11 +74,11 @@ upgrade() {
     --chain=${CHAIN} --proxy=${PROXY} \
     --gas-limit=400000000 \
     --arguments $ash_id $gov_sc_address $sc \
-    --outfile="deploy-BoY.interaction.json" \
+    --outfile="deploy-devnet.interaction.json" \
     --send || return
 }
 
-# source interaction/BoY.snippets.sh && addLiquidityAndEnterFarmBtc 1000000 10000000 
+# source interaction/boy.snippets.sh && addLiquidityAndEnterFarmBtc 1000000 10000000 
 addLiquidityAndEnterFarmBtc() {
     # add_liquidity to renBTC / WBTC pool and enterFarm with lp token provided
 
@@ -91,15 +91,15 @@ addLiquidityAndEnterFarmBtc() {
     erdpy --verbose contract call ${MY_ADDRESS} --recall-nonce \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=200000000 \
+    --gas-limit=600000000 \
     --function="MultiESDTNFTTransfer" \
     --arguments ${addr} 02 ${btc_id} 00 $1 ${wbtc_id} 00 $2 ${method} ${swap_btc} ${farm_btc} ${lp_btc_id}  \
     --send || return
 }
 
-# source interaction/BoY.snippets.sh && addLiquidityAndEnterFarmBtc 1000000 10000000 
-addLiquidityAndEnterFarmUsdc() {
-    # add_liquidity to renBTC / WBTC pool and enterFarm with lp token provided
+# source interaction/boy.snippets.sh && addLiquidityAndEnterFarmUsdcUsdt 1000000 10000000 
+addLiquidityAndEnterFarmUsdcUsdt() {
+    # add_liquidity to USDC/USDT pool and enterFarm with lp token provided
 
     # $1 first_token_amount_min
     # $2 second_token_amount_min
@@ -110,29 +110,73 @@ addLiquidityAndEnterFarmUsdc() {
     erdpy --verbose contract call ${MY_ADDRESS} --recall-nonce \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=200000000 \
+    --gas-limit=600000000 \
     --function="MultiESDTNFTTransfer" \
     --arguments ${addr} 02 ${usdc_id} 00 $1 ${usdt_id} 00 $2 ${method} ${swap_usdc_usdt} ${farm_usdc_usdt} ${lp_usdc_usdt_id}  \
     --send || return
 }
 
-compound() {
-    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+# source interaction/boy.snippets.sh && addLiquidityAndEnterFarmUsdcWusdc 1000000 10000000 
+addLiquidityAndEnterFarmUsdcWusdc() {
+    # add_liquidity to USDC/USDT pool and enterFarm with lp token provided
+
+    # $1 first_token_amount_min
+    # $2 second_token_amount_min
+
+    method="0x$(echo -n 'addLiquidityAndEnterFarm' | xxd -p -u | tr -d '\n')"
+    addr="0x$(erdpy wallet bech32 --decode ${ADDRESS})"
+
+    erdpy --verbose contract call ${MY_ADDRESS} --recall-nonce \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=200000000 \
-    --function="compound"  \
-    --arguments ${farm_usdc_usdt} ${pair_ash_usdc} ${usdc_id} ${swap_usdc_usdt} ${usdt_id} ${lp_usdc_usdt_id} \
+    --gas-limit=600000000 \
+    --function="MultiESDTNFTTransfer" \
+    --arguments ${addr} 02 ${usdc_id} 00 $1 ${wusdc_id} 00 $2 ${method} ${swap_usdc_wusdc} ${farm_usdc_wusdc} ${lp_usdc_wusdc_id}  \
     --send || return
 }
 
+compoundUsdcUsdt() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=600000000 \
+    --function="compound" \
+    --arguments ${farm_usdc_usdt} ${pair_ash_usdc} ${usdc_id} ${swap_usdc_usdt} ${usdt_id} ${lp_usdc_usdt_id} \
+    --simulate || return
+}
+
+exitFarmBtc() {
+    
+     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+        --pem=${WALLET_PEM} \
+        --gas-limit=600000000 \
+        --proxy=${PROXY} --chain=${CHAIN} \
+        --function="exitFarm" \
+        --arguments $farm_btc \
+        --send || return
+}
+
+exitFarmUsdcUsdt() {
+    
+     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+        --pem=${WALLET_PEM} \
+        --gas-limit=600000000 \
+        --proxy=${PROXY} --chain=${CHAIN} \
+        --function="exitFarm" \
+        --arguments $farm_usdc_usdt \
+        --send || return
+}
+
 harvest() {
+    # harvest all I got from the sc regarding the token_id and the nonce
+    # $1 nonce
+    id="0x$(echo -n 'FBW-1c60a3' | xxd -p -u | tr -d '\n')"
      erdpy --verbose contract call ${ADDRESS} --recall-nonce \
         --pem=${WALLET_PEM} \
         --gas-limit=600000000 \
         --proxy=${PROXY} --chain=${CHAIN} \
         --function="harvest" \
-        --arguments $ash_id 1000000000000000000 \
+        --arguments $id $1 \
         --send || return
 }
 

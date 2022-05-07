@@ -1,3 +1,3 @@
 #!/bin/bash
 
-source ./interaction/devnet.snippets.sh && compoundUsdcUsdt
+source ./interaction/boy.snippets.sh && compoundUsdcUsdt

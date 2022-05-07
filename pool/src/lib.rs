@@ -11,7 +11,7 @@ pub type EnterFarmResultType<BigUint> = EsdtTokenPayment<BigUint>;
 pub type ClaimRewardsResultType<BigUint> =
     MultiValue2<EsdtTokenPayment<BigUint>, EsdtTokenPayment<BigUint>>;
 
-// governance testnet address : erd1qqqqqqqqqqqqqpgqvrc0x026cf44kktc7jhw6mgtpu9d5cw2j9tsfxnjta
+// compound contract on shard 0 : erd1qqqqqqqqqqqqqpgqk4ettjn427uylpatu0hpzksjckecletgc3vqlyu4wd
 
 #[elrond_wasm::contract]
 pub trait CompoundContract {
