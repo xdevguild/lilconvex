@@ -34,7 +34,7 @@ farm_btc="0x$(erdpy wallet bech32 --decode ${FARM_BTC})"
 farm_usdc_usdt="0x$(erdpy wallet bech32 --decode ${FARM_USDC_USDT})" 
 farm_usdc_wusdc="0x$(erdpy wallet bech32 --decode ${FARM_USDC_WUSDC})" 
 
-pair_ash_usdt="0x$(erdpy wallet bech32 --decode ${SWAP_ASH_USDC})" 
+pair_ash_usdt="0x$(erdpy wallet bech32 --decode ${PAIR_ASH_USDT})" 
 pair_wbtc_usdc="0x$(erdpy wallet bech32 --decode ${PAIR_ASH_USDC})" 
 ###########################################
 btc_id="0x$(echo -n 'RENBTC-0b6973' | xxd -p -u | tr -d '\n')" # OK
@@ -141,8 +141,18 @@ compoundUsdcUsdt() {
     --chain=${CHAIN} --proxy=${PROXY} \
     --gas-limit=600000000 \
     --function="compound" \
-    --arguments ${farm_usdc_usdt} ${pair_ash_usdc} ${usdc_id} ${swap_usdc_usdt} ${usdt_id} ${lp_usdc_usdt_id} \
-    --simulate || return
+    --arguments ${farm_usdc_usdt} ${pair_ash_usdt} ${usdt_id} ${swap_usdc_usdt} ${usdc_id} ${lp_usdc_usdt_id} \
+    --send || return
+}
+
+compoundUsdcWusdc() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=50061012 \
+    --function="compoundUsdcWusdc" \
+    --arguments ${farm_usdc_wusdc} ${pair_ash_usdt} ${usdt_id} ${swap_usdc_usdt} ${usdc_id} ${swap_usdc_wusdc} ${wusdc_id} ${lp_usdc_wusdc_id} \
+    --send || return
 }
 
 exitFarmBtc() {
@@ -181,15 +191,15 @@ harvest() {
 }
 
 testPair() {
-    # $1 token_out
+    # $1 token_in
     # $2 amount_min_out
     method="0x$(echo -n 'swapTokensFixedInput' | xxd -p -u | tr -d '\n')"
-     erdpy --verbose contract call ${PAIR_ASH_USDC} --recall-nonce \
+     erdpy --verbose contract call ${PAIR_ASH_USDT} --recall-nonce \
         --pem=${WALLET_PEM} \
         --gas-limit=600000000 \
         --proxy=${PROXY} --chain=${CHAIN} \
         --function="ESDTTransfer" \
-        --arguments $ash_id $1 $method $usdc_id $2 \
+        --arguments $ash_id $1 $method $usdt_id $2 \
         --send || return
 }
 

@@ -13,4 +13,7 @@ pub trait Pair {
         amount_out_min: BigUint
     ) -> SwapTokensFixedInputResultType<Self::Api>;
 
+    #[view(getAmountOut)]
+    fn get_amount_out_view(&self, token_in: TokenIdentifier, amount_in: BigUint) -> BigUint;
+
 }

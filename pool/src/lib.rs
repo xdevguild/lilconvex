@@ -147,7 +147,7 @@ pub trait CompoundContract {
         target_farm_sc: ManagedAddress,
         lp_token_id: TokenIdentifier,
         first_token: TokenIdentifier,
-        second_token: TokenIdentifier
+        second_token: TokenIdentifier,
     ) {
 
         let mut payments = ManagedVec::new();
@@ -171,12 +171,10 @@ pub trait CompoundContract {
         // add liquidity to stableswap with USDC and USDT balance of the sc
         self.stableswap_contract(swap_sc)
             .add_liquidity(
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
+                self.blockchain().get_sc_balance(
                     &first_token,
                     0),
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
+                self.blockchain().get_sc_balance(
                     &second_token,
                     0),
                 self.sc().get())
@@ -208,7 +206,7 @@ pub trait CompoundContract {
         // with nonce zero, it will NOT be pushed as a payment token
         self.farm_token_infos(target_farm_sc.clone()).set_if_empty(
             &EsdtTokenPayment::new(
-                TokenIdentifier::from_esdt_bytes("FUU-0cf97f".as_bytes()),
+                lp_token_clone,
                 0,
                 BigUint::zero()
             )
@@ -270,32 +268,26 @@ pub trait CompoundContract {
 
         // 2. swap ash to usdt
 
-        let ash_amount = self.blockchain().get_sc_balance(&self.ash_id().get(), 0);
-
-        let mut amount_out_min = ash_amount.clone() * BigUint::from(10u64);
-        amount_out_min = amount_out_min / BigUint::from(100_000_000_000_000_000u64); // in order to have a 4 decimals amount for USDT (we are sure to not have slippage error)
-        // will need to be rethought in order to control slippage properly
-
+        let ash_id = self.ash_id().get();
+        let ash_amount = self.blockchain().get_sc_balance(&ash_id, 0);
 
         // we retrieve the payment token (USDT during BoY)
-        let mut stable_result: SwapTokensFixedInputResultType<Self::Api> = self.pair_contract(pair_sc)
-            .swap_tokens_fixed_input(token_out.clone(), amount_out_min)
+        self.pair_contract(pair_sc)
+            .swap_tokens_fixed_input(token_out.clone(), BigUint::from(1u64)) // 1 in order to avoid slippage errors
             .add_token_transfer(
                 self.ash_id().get(),
                 0,
                 ash_amount
             )
-            .execute_on_dest_context_custom_range(|_, after| (after - 1, after));
+            .execute_on_dest_context();
 
         // 3. swap usdt to usdc
         // take half of the USDT
         let mut payment_amount = self.blockchain().get_sc_balance(&token_out, 0) * BigUint::from(495u64);
         payment_amount = payment_amount / BigUint::from(1000u64); // 49.5 %
 
-        //update the amount of the payment stable token
-        self.b().set(&payment_amount); // used to debug
-
-        // swap the usdt to usdc
+        
+        // // swap the usdt to usdc
         self.stableswap_contract(swap_sc.clone())
             .exchange(token_to_receive.clone(), 0)
             .add_token_transfer(
@@ -307,8 +299,75 @@ pub trait CompoundContract {
 
         // 4. add liquidity and enter farm
 
-        self.add_liquidity_and_enter_farm_when_compounding(swap_sc, target_farm_sc, lp_token_id, token_out, token_to_receive);
+        // usdc BEFORE usdt when adding liquidity
+        self.add_liquidity_and_enter_farm_when_compounding(swap_sc, target_farm_sc, lp_token_id, token_to_receive, token_out);
     }
+
+    #[endpoint(compoundUsdcWusdc)]
+    fn compound_usdc_wusdc(
+        &self,
+        target_farm_sc: ManagedAddress,
+        pair_sc: ManagedAddress,
+        token_out: TokenIdentifier,
+        swap_sc: ManagedAddress,
+        token_to_receive: TokenIdentifier, // the token that you will exchange from usdt (so USDC)
+        second_swap: ManagedAddress,
+        wusdc_id: TokenIdentifier,
+        lp_token_id: TokenIdentifier
+    ) {
+        // 1. claim rewards
+        self.claim_rewards_in_contract(target_farm_sc.clone());
+
+        // 2. swap ash to usdt
+
+        let ash_id = self.ash_id().get();
+        let ash_amount = self.blockchain().get_sc_balance(&ash_id, 0);
+
+        // we retrieve the payment token (USDT during BoY)
+        self.pair_contract(pair_sc)
+            .swap_tokens_fixed_input(token_out.clone(), BigUint::from(1u64)) // 1 in order to avoid slippage errors
+            .add_token_transfer(
+                self.ash_id().get(),
+                0,
+                ash_amount
+            )
+            .execute_on_dest_context();
+
+        // 3. swap usdt to usdc
+        // take all the usdt
+        let payment_amount = self.blockchain().get_sc_balance(&token_out, 0);
+
+        // // swap the usdt to usdc
+        self.stableswap_contract(swap_sc.clone())
+            .exchange(token_to_receive.clone(), 0)
+            .add_token_transfer(
+                token_out.clone(),
+                0,
+                payment_amount
+            )
+            .execute_on_dest_context();
+
+        // 4. swap usdc to  wusdc
+        // take half of the USDC
+        let mut payment_amount_wusdc = self.blockchain().get_sc_balance(&token_to_receive, 0) * BigUint::from(495u64);
+        payment_amount_wusdc = payment_amount_wusdc / BigUint::from(1000u64); // 49.5 %
+
+        // // swap the usdc to wusdc
+        self.stableswap_contract(second_swap.clone())
+            .exchange(wusdc_id.clone(), 0)
+            .add_token_transfer(
+                token_to_receive.clone(),
+                0,
+                payment_amount_wusdc
+            )
+            .execute_on_dest_context();
+        
+        // 5. add liquidity and enter farm
+
+        // usdc BEFORE usdt when adding liquidity
+        self.add_liquidity_and_enter_farm_when_compounding(second_swap, target_farm_sc, lp_token_id, token_to_receive, wusdc_id);
+    }
+
 
     #[endpoint(exitFarm)]
     fn exit_farm(
