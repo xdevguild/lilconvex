@@ -20,7 +20,7 @@ Additional future functionalities:
 
 Schema of the `addLiquidityAndEnterFarm` workflow.
 
-![alt text](https://github.com/yum0e/lilconvex/tree/main/images/addLiquidityAndEnterFarm.png?raw=true)
+![alt text](https://github.com/yum0e/lilconvex/blob/main/images/addLiquidityAndEnterFarm.png?raw=true)
 
 Schema of the `compound` workflow.
 
