@@ -386,7 +386,6 @@ pub trait CompoundContract {
         self.claim_rewards_in_contract(target_farm_sc.clone());
 
         // 2. swap ash to usdt
-
         let ash_id = self.ash_id().get();
         let ash_amount = self.blockchain().get_sc_balance(&ash_id, 0);
 
@@ -405,20 +404,25 @@ pub trait CompoundContract {
         let payment_amount = self.blockchain().get_sc_balance(&token_out, 0);
 
         // // swap the usdt to usdc
-        self.stableswap_contract(swap_sc.clone())
-            .exchange(token_to_receive.clone(), 0)
-            .add_token_transfer(
-                token_out.clone(),
-                0,
-                payment_amount
-            )
-            .execute_on_dest_context();
+        self.exchange(
+            swap_sc.clone(), 
+            token_to_receive.clone(), 
+            0, 
+            token_out.clone(),
+            payment_amount);
 
         // 4. swap usdc to  wbtc
         // sell all usdc to WBTC
         let payment_amount_wbtc = self.blockchain().get_sc_balance(&token_to_receive, 0);
 
         // // swap the usdc to wbtc
+        // self.swap_tokens(
+        //     second_pair_sc.clone(), 
+        //     wbtc_id.clone(), 
+        //     BigUint::zero(), 
+        //     token_to_receive.clone(), 
+        //     payment_amount_wbtc);
+        
         self.pair_contract(second_pair_sc.clone())
             .swap_tokens_fixed_input(wbtc_id.clone(), BigUint::from(1u64))
             .add_token_transfer(
@@ -432,20 +436,69 @@ pub trait CompoundContract {
         let mut payment_amount_btc = self.blockchain().get_sc_balance(&wbtc_id, 0) * BigUint::from(495u64);
         payment_amount_btc = payment_amount_btc / BigUint::from(1_000u64); // 49.5% 
 
-        // // swap the wbtc to btc
-        self.stableswap_contract(btc_swap.clone())
-            .exchange(btc_id.clone(), 0)
-            .add_token_transfer(
-                wbtc_id.clone(),
-                0,
-                payment_amount_btc
-            )
-            .execute_on_dest_context();
+        // swap the wbtc to btc
+        self.exchange(
+            btc_swap.clone(), 
+            btc_id.clone(), 
+            0, 
+            wbtc_id.clone(), 
+            payment_amount_btc);
 
         // 6. add liquidity and enter farm
 
         // usdc BEFORE usdt when adding liquidity
         self.add_liquidity_and_enter_farm_when_compounding(btc_swap, target_farm_sc, lp_token_id, btc_id, wbtc_id);
+    }
+
+    #[endpoint(compoundAll)]
+    fn compound_all(
+        &self,
+        farm_usdc_usdt: ManagedAddress,
+        farm_usdc_wusdc: ManagedAddress,
+        farm_btc: ManagedAddress,
+        pair_ash_usdt: ManagedAddress,
+        pair_wbtc_usdc: ManagedAddress,
+        usdt_id: TokenIdentifier,
+        usdc_id: TokenIdentifier, 
+        wusdc_id: TokenIdentifier,
+        wbtc_id: TokenIdentifier,
+        btc_id: TokenIdentifier,
+        swap_usdc_usdt: ManagedAddress,
+        swap_usdc_wusdc: ManagedAddress,
+        btc_swap: ManagedAddress,
+        lp_usdc_usdt_id: TokenIdentifier,
+        lp_usdc_wusdc_id: TokenIdentifier,
+        lp_btc_id: TokenIdentifier
+    ) {
+        self.compound(
+            farm_usdc_usdt, 
+            pair_ash_usdt.clone(), 
+            usdt_id.clone(), 
+            swap_usdc_usdt.clone(), 
+            usdc_id.clone(), 
+            lp_usdc_usdt_id);
+
+        self.compound_usdc_wusdc(
+            farm_usdc_wusdc, 
+            pair_ash_usdt.clone(), 
+            usdt_id.clone(), 
+            swap_usdc_usdt.clone(), 
+            usdc_id.clone(), 
+            swap_usdc_wusdc, 
+            wusdc_id, 
+            lp_usdc_wusdc_id);
+
+        self.compound_btc(
+            farm_btc, 
+            pair_ash_usdt, 
+            usdt_id, 
+            swap_usdc_usdt,
+            usdc_id, 
+            pair_wbtc_usdc, 
+            wbtc_id, 
+            btc_swap, 
+            btc_id, 
+            lp_btc_id);
     }
 
     #[endpoint(exitFarm)]
@@ -469,24 +522,6 @@ pub trait CompoundContract {
         // new NFT data sender issue if not doing this
         new_farm_token_infos.token_nonce = 0;
         self.farm_token_infos(farm_sc).set(&new_farm_token_infos);
-    }
-
-    #[payable("*")]
-    #[endpoint(exchange)]
-    fn exchange(
-        &self,
-        swap_sc: ManagedAddress,
-        token_to_receive: TokenIdentifier,
-        index: u64
-    ) {
-        self.stableswap_contract(swap_sc)
-            .exchange(token_to_receive, index)
-            .add_token_transfer(
-                self.call_value().token(),
-                self.call_value().esdt_token_nonce(),
-                self.call_value().esdt_value()
-            )
-            .execute_on_dest_context()
     }
 
     #[payable("*")]
@@ -515,6 +550,44 @@ pub trait CompoundContract {
     fn get_farm_token_amount(&self, target_farm_sc: ManagedAddress) -> BigUint {
         let farm_token_infos = self.farm_token_infos(target_farm_sc).get();
         farm_token_infos.amount
+    }
+
+    // private
+
+    fn exchange(
+        &self,
+        swap_sc: ManagedAddress,
+        token_to_receive: TokenIdentifier,
+        index: u64,
+        payment_token_id: TokenIdentifier,
+        payment_token_amount: BigUint
+    ) {
+        self.stableswap_contract(swap_sc)
+            .exchange(token_to_receive, index)
+            .add_token_transfer(
+                payment_token_id,
+                0,
+                payment_token_amount
+            )
+            .execute_on_dest_context();
+    }
+
+    fn swap_tokens(
+        &self,
+        pair_sc: ManagedAddress,
+        token_out: TokenIdentifier,
+        amount_out_min: BigUint,
+        payment_token_id: TokenIdentifier,
+        payment_token_amount: BigUint
+    ) {
+        self.pair_contract(pair_sc)
+            .swap_tokens_fixed_input(token_out, amount_out_min)
+            .add_token_transfer(
+                payment_token_id,
+                0,
+                payment_token_amount
+            )
+            .execute_on_dest_context();
     }
     
     // storage
