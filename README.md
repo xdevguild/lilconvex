@@ -24,7 +24,9 @@ Schema of the `addLiquidityAndEnterFarm` workflow.
 
 Schema of the `compound` workflow.
 
-> to be added.
+> This workflow is specific to the USDC/USDT pool. It is a bit more complicated for the other pools (more swaps 😎)
+
+![alt text](https://github.com/yum0e/lilconvex/blob/main/images/compound.png?raw=true)
 
 ## How to autocompound
 

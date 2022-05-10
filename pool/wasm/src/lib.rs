@@ -9,7 +9,6 @@ elrond_wasm_node::wasm_endpoints! {
     (
         addLiquidityAndEnterFarm
         addLiquidityAndEnterFarmWhenCompounding
-        claimRewardsInContract
         compound
         compoundAll
         compoundBtc

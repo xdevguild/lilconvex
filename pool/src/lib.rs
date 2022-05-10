@@ -230,29 +230,6 @@ pub trait CompoundContract {
         self.farm_token_infos(target_farm_sc.clone()).set(&result_farm_entering);
     }
 
-    #[endpoint(claimRewardsInContract)]
-    fn claim_rewards_in_contract(
-        &self,
-        target_farm_sc: ManagedAddress, // we provide the farm sc in args in order to create versatile functions
-    ) {
-        // harvest informations about farm token in order to send `lp_amount` of tokens to farm contract and receive reward
-        let farm_token_infos = self.farm_token_infos(target_farm_sc.clone()).get();
-
-        let claim_farm_result: ClaimRewardsResultType<Self::Api> = self.farm_contract(target_farm_sc.clone())
-            .claim_rewards()
-            .add_token_transfer(
-                farm_token_infos.token_identifier,
-                farm_token_infos.token_nonce,
-                farm_token_infos.amount,
-            )
-            .execute_on_dest_context_custom_range(|_, after| (after - 2, after));
-
-        let (new_staking_farm_token, reward_token) = claim_farm_result.into_tuple();
-
-        self.farm_token_infos(target_farm_sc).set(new_staking_farm_token);
-        self.reward_token_infos().set(reward_token);
-    }
-
     #[endpoint(compound)]
     fn compound(
         &self,
@@ -589,7 +566,29 @@ pub trait CompoundContract {
             )
             .execute_on_dest_context();
     }
-    
+
+    fn claim_rewards_in_contract(
+        &self,
+        target_farm_sc: ManagedAddress, // we provide the farm sc in args in order to create versatile functions
+    ) {
+        // harvest informations about farm token in order to send `lp_amount` of tokens to farm contract and receive reward
+        let farm_token_infos = self.farm_token_infos(target_farm_sc.clone()).get();
+
+        let claim_farm_result: ClaimRewardsResultType<Self::Api> = self.farm_contract(target_farm_sc.clone())
+            .claim_rewards()
+            .add_token_transfer(
+                farm_token_infos.token_identifier,
+                farm_token_infos.token_nonce,
+                farm_token_infos.amount,
+            )
+            .execute_on_dest_context_custom_range(|_, after| (after - 2, after));
+
+        let (new_staking_farm_token, reward_token) = claim_farm_result.into_tuple();
+
+        self.farm_token_infos(target_farm_sc).set(new_staking_farm_token);
+        self.reward_token_infos().set(reward_token);
+    }
+
     // storage
 
     #[storage_mapper("governance_sc_address")]
