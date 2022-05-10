@@ -35,7 +35,7 @@ farm_usdc_usdt="0x$(erdpy wallet bech32 --decode ${FARM_USDC_USDT})"
 farm_usdc_wusdc="0x$(erdpy wallet bech32 --decode ${FARM_USDC_WUSDC})" 
 
 pair_ash_usdt="0x$(erdpy wallet bech32 --decode ${PAIR_ASH_USDT})" 
-pair_wbtc_usdc="0x$(erdpy wallet bech32 --decode ${PAIR_ASH_USDC})" 
+pair_wbtc_usdc="0x$(erdpy wallet bech32 --decode ${PAIR_WBTC_USDC})" 
 ###########################################
 btc_id="0x$(echo -n 'RENBTC-0b6973' | xxd -p -u | tr -d '\n')" # OK
 wbtc_id="0x$(echo -n 'WBTC-9bdb9b' | xxd -p -u | tr -d '\n')" # OK
@@ -152,6 +152,16 @@ compoundUsdcWusdc() {
     --gas-limit=50061012 \
     --function="compoundUsdcWusdc" \
     --arguments ${farm_usdc_wusdc} ${pair_ash_usdt} ${usdt_id} ${swap_usdc_usdt} ${usdc_id} ${swap_usdc_wusdc} ${wusdc_id} ${lp_usdc_wusdc_id} \
+    --send || return
+}
+
+compoundBtc() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=60061012 \
+    --function="compoundBtc" \
+    --arguments ${farm_btc} ${pair_ash_usdt} ${usdt_id} ${swap_usdc_usdt} ${usdc_id} ${pair_wbtc_usdc} ${wbtc_id} ${swap_btc} ${btc_id} ${lp_btc_id} \
     --send || return
 }
 

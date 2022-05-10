@@ -368,6 +368,85 @@ pub trait CompoundContract {
         self.add_liquidity_and_enter_farm_when_compounding(second_swap, target_farm_sc, lp_token_id, token_to_receive, wusdc_id);
     }
 
+    #[endpoint(compoundBtc)]
+    fn compound_btc(
+        &self,
+        target_farm_sc: ManagedAddress,
+        pair_sc: ManagedAddress,
+        token_out: TokenIdentifier,
+        swap_sc: ManagedAddress,
+        token_to_receive: TokenIdentifier, // the token that you will exchange from usdt (so USDC)
+        second_pair_sc: ManagedAddress,
+        wbtc_id: TokenIdentifier,
+        btc_swap: ManagedAddress,
+        btc_id: TokenIdentifier,
+        lp_token_id: TokenIdentifier
+    ) {
+        // 1. claim rewards
+        self.claim_rewards_in_contract(target_farm_sc.clone());
+
+        // 2. swap ash to usdt
+
+        let ash_id = self.ash_id().get();
+        let ash_amount = self.blockchain().get_sc_balance(&ash_id, 0);
+
+        // we retrieve the payment token (USDT during BoY)
+        self.pair_contract(pair_sc)
+            .swap_tokens_fixed_input(token_out.clone(), BigUint::from(1u64)) // 1 in order to avoid slippage errors
+            .add_token_transfer(
+                self.ash_id().get(),
+                0,
+                ash_amount
+            )
+            .execute_on_dest_context();
+
+        // 3. swap usdt to usdc
+        // take all the usdt
+        let payment_amount = self.blockchain().get_sc_balance(&token_out, 0);
+
+        // // swap the usdt to usdc
+        self.stableswap_contract(swap_sc.clone())
+            .exchange(token_to_receive.clone(), 0)
+            .add_token_transfer(
+                token_out.clone(),
+                0,
+                payment_amount
+            )
+            .execute_on_dest_context();
+
+        // 4. swap usdc to  wbtc
+        // sell all usdc to WBTC
+        let payment_amount_wbtc = self.blockchain().get_sc_balance(&token_to_receive, 0);
+
+        // // swap the usdc to wbtc
+        self.pair_contract(second_pair_sc.clone())
+            .swap_tokens_fixed_input(wbtc_id.clone(), BigUint::from(1u64))
+            .add_token_transfer(
+                token_to_receive.clone(),
+                0,
+                payment_amount_wbtc
+            )
+            .execute_on_dest_context();
+
+        // 5. Swap half of wbtc to btc
+        let mut payment_amount_btc = self.blockchain().get_sc_balance(&wbtc_id, 0) * BigUint::from(495u64);
+        payment_amount_btc = payment_amount_btc / BigUint::from(1_000u64); // 49.5% 
+
+        // // swap the wbtc to btc
+        self.stableswap_contract(btc_swap.clone())
+            .exchange(btc_id.clone(), 0)
+            .add_token_transfer(
+                wbtc_id.clone(),
+                0,
+                payment_amount_btc
+            )
+            .execute_on_dest_context();
+
+        // 6. add liquidity and enter farm
+
+        // usdc BEFORE usdt when adding liquidity
+        self.add_liquidity_and_enter_farm_when_compounding(btc_swap, target_farm_sc, lp_token_id, btc_id, wbtc_id);
+    }
 
     #[endpoint(exitFarm)]
     fn exit_farm(

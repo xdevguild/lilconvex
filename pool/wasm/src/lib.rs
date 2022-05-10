@@ -11,6 +11,7 @@ elrond_wasm_node::wasm_endpoints! {
         addLiquidityAndEnterFarmWhenCompounding
         claimRewardsInContract
         compound
+        compoundBtc
         compoundUsdcWusdc
         exchange
         exitFarm
