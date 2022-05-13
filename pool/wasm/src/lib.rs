@@ -12,6 +12,7 @@ elrond_wasm_node::wasm_endpoints! {
         compoundAll
         compoundBtc
         compoundUsdcWusdc
+        exitAllPosition
         exitFarm
         exitPosition
         getA

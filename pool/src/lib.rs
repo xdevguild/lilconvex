@@ -109,6 +109,27 @@ pub trait CompoundContract {
 
     }
 
+    #[only_owner]
+    #[endpoint(exitAllPosition)]
+    fn exit_all_position(
+        &self,
+        farm_btc: ManagedAddress,
+        farm_usdc_usdt: ManagedAddress,
+        farm_usdc_wusdc: ManagedAddress,
+        swap_btc: ManagedAddress,
+        swap_usdc_usdt: ManagedAddress,
+        swap_usdc_wusdc: ManagedAddress,
+        btc_id: TokenIdentifier,
+        wbtc_id: TokenIdentifier,
+        usdc_id: TokenIdentifier,
+        wusdc_id: TokenIdentifier,
+        usdt_id: TokenIdentifier
+    ) {
+        self.exit_position(farm_btc, swap_btc, btc_id, wbtc_id);
+        self.exit_position(farm_usdc_usdt, swap_usdc_usdt, usdc_id.clone(), usdt_id);
+        self.exit_position(farm_usdc_wusdc, swap_usdc_wusdc, usdc_id, wusdc_id);
+    }
+
 
     //
     // endpoint

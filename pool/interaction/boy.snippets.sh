@@ -205,6 +205,16 @@ exitPositionBtc() {
     --send || return
 }
 
+exitAllPosition() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=600000000 \
+    --function="exitAllPosition" \
+    --arguments ${farm_btc} ${farm_usdc_usdt} ${farm_usdc_wusdc} ${swap_btc} ${swap_usdc_usdt} ${swap_usdc_wusdc} ${btc_id} ${wbtc_id} ${usdc_id} ${wusdc_id} ${usdt_id} \
+    --send || return
+}
+
 harvest() {
     # harvest all I got from the sc regarding the token_id and the nonce
     # $1 nonce
