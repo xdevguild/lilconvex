@@ -3,8 +3,6 @@ elrond_wasm::imports!();
 #[elrond_wasm::proxy]
 pub trait StableSwap {
 
-    // WBTC renBTC pool - erd1qqqqqqqqqqqqqpgq79zadfzu2gxdug2ztue6q6aa8xret9qszh0qzx5ncc on devnet
-
     #[payable("*")]
     #[endpoint(addLiquidity)]
     fn add_liquidity(
@@ -20,5 +18,13 @@ pub trait StableSwap {
         &self,
         token_to_receive: TokenIdentifier,
         index: u64);
+
+    #[payable("*")]
+    #[endpoint(removeLiquidity)]
+    fn remove_liquidity(
+        &self,
+        min_first_token_out: BigUint,
+        min_second_token_out: BigUint
+    );
     
 }

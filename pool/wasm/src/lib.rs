@@ -8,19 +8,19 @@ elrond_wasm_node::wasm_endpoints! {
     pool
     (
         addLiquidityAndEnterFarm
-        addLiquidityAndEnterFarmWhenCompounding
         compound
         compoundAll
         compoundBtc
         compoundUsdcWusdc
         exitFarm
+        exitPosition
         getA
         getB
         getFarmTokenAmount
         getFarmTokenInfos
         getRewardTokenInfos
+        getSwapLpTokenId
         harvest
-        increaseAmount
     )
 }
 

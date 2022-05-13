@@ -149,7 +149,7 @@ compoundUsdcWusdc() {
     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=50061012 \
+    --gas-limit=60061012 \
     --function="compoundUsdcWusdc" \
     --arguments ${farm_usdc_wusdc} ${pair_ash_usdt} ${usdt_id} ${swap_usdc_usdt} ${usdc_id} ${swap_usdc_wusdc} ${wusdc_id} ${lp_usdc_wusdc_id} \
     --send || return
@@ -169,32 +169,40 @@ compoundAll() {
     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
     --pem=${WALLET_PEM} \
     --chain=${CHAIN} --proxy=${PROXY} \
-    --gas-limit=150000000 \
+    --gas-limit=600000000 \
     --function="compoundAll" \
     --arguments ${farm_usdc_usdt} ${farm_usdc_wusdc} ${farm_btc} ${pair_ash_usdt} ${pair_wbtc_usdc} ${usdt_id} ${usdc_id} ${wusdc_id} ${wbtc_id} ${btc_id} ${swap_usdc_usdt} ${swap_usdc_wusdc} ${swap_btc} ${lp_usdc_usdt_id} ${lp_usdc_wusdc_id} ${lp_btc_id} \
     --send || return
 }
 
-exitFarmBtc() {
-    
-     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
-        --pem=${WALLET_PEM} \
-        --gas-limit=600000000 \
-        --proxy=${PROXY} --chain=${CHAIN} \
-        --function="exitFarm" \
-        --arguments $farm_btc \
-        --send || return
+exitPositionUsdcUsdt() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=150000000 \
+    --function="exitPosition" \
+    --arguments ${farm_usdc_usdt} ${swap_usdc_usdt} ${usdc_id} ${usdt_id} \
+    --send || return
 }
 
-exitFarmUsdcUsdt() {
-    
-     erdpy --verbose contract call ${ADDRESS} --recall-nonce \
-        --pem=${WALLET_PEM} \
-        --gas-limit=600000000 \
-        --proxy=${PROXY} --chain=${CHAIN} \
-        --function="exitFarm" \
-        --arguments $farm_usdc_usdt \
-        --send || return
+exitPositionUsdcWusdc() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=150000000 \
+    --function="exitPosition" \
+    --arguments ${farm_usdc_wusdc} ${swap_usdc_wusdc} ${usdc_id} ${wusdc_id} \
+    --send || return
+}
+
+exitPositionBtc() {
+    erdpy --verbose contract call ${ADDRESS} --recall-nonce \
+    --pem=${WALLET_PEM} \
+    --chain=${CHAIN} --proxy=${PROXY} \
+    --gas-limit=150000000 \
+    --function="exitPosition" \
+    --arguments ${farm_btc} ${swap_btc} ${btc_id} ${wbtc_id} \
+    --send || return
 }
 
 harvest() {

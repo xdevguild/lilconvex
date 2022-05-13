@@ -45,6 +45,12 @@ pub trait CompoundContract {
         );
     }
 
+
+    //
+    // only owner 
+    //
+
+    // only owner because I am the only user of the smart contract for now
     #[only_owner]
     #[endpoint(harvest)]
     fn harvest(
@@ -65,6 +71,50 @@ pub trait CompoundContract {
             );
     }
 
+    // only owner because I am the only user of the smart contract for now
+    #[only_owner]
+    #[endpoint(exitPosition)]
+    fn exit_position(
+        &self,
+        farm_sc: ManagedAddress,
+        swap_sc: ManagedAddress,
+        first_token_id: TokenIdentifier,
+        second_token_id: TokenIdentifier
+    ) {
+        // 1. exit farm and retrieve lp token
+        self.exit_farm(farm_sc);
+
+        // 2. remove liquidity in swap
+
+        // retrieve lp token
+        let lp_token_id = self.swap_lp_token_id(swap_sc.clone()).get();
+        let lp_token_amount = self.blockchain().get_sc_balance(
+            &lp_token_id,
+            0
+        );
+
+        self.stableswap_contract(swap_sc)
+            .remove_liquidity(BigUint::zero(), BigUint::zero())
+            .add_token_transfer(
+                lp_token_id,
+                0,
+                lp_token_amount
+            )
+            .execute_on_dest_context();
+
+        // 3. harvest tokens & ASH
+        self.harvest(first_token_id, 0);
+        self.harvest(second_token_id, 0);
+        self.harvest(self.ash_id().get(), 0);
+
+    }
+
+
+    //
+    // endpoint
+    //
+
+
     #[payable("*")]
     #[endpoint(addLiquidityAndEnterFarm)]
     fn add_liquidity_and_enter_farm(
@@ -80,7 +130,7 @@ pub trait CompoundContract {
         let second_payment_token = payments.get(1);
 
         // add liquidity to stableswap with USDC and USDT balance of the sc
-        self.stableswap_contract(swap_sc)
+        self.stableswap_contract(swap_sc.clone())
             .add_liquidity(
                 self.blockchain().get_sc_balance(
                     &first_payment_token.token_identifier,
@@ -102,7 +152,7 @@ pub trait CompoundContract {
         let lp_token_clone = lp_token_id.clone();
         payments_enter_farm.push(
             EsdtTokenPayment::new(
-                lp_token_id,
+                lp_token_id.clone(),
                 0,
                 self.blockchain().get_sc_balance(
                     &lp_token_clone,
@@ -138,96 +188,8 @@ pub trait CompoundContract {
         
         // store new farm token
         self.farm_token_infos(target_farm_sc.clone()).set(&result_farm_entering);
-    }
-
-    #[endpoint(addLiquidityAndEnterFarmWhenCompounding)]
-    fn add_liquidity_and_enter_farm_when_compounding(
-        &self,
-        swap_sc: ManagedAddress,
-        target_farm_sc: ManagedAddress,
-        lp_token_id: TokenIdentifier,
-        first_token: TokenIdentifier,
-        second_token: TokenIdentifier,
-    ) {
-
-        let mut payments = ManagedVec::new();
-        // push first token that is the token out when swapping from ash (is likely USDT)
-        payments.push(
-            EsdtTokenPayment::new(
-                first_token.clone(),
-                0,
-                self.blockchain().get_sc_balance(&first_token, 0)
-            )
-        );
-        // add USDC
-        payments.push(
-            EsdtTokenPayment::new(
-                second_token.clone(),
-                0,
-                self.blockchain().get_sc_balance(&second_token, 0)
-            )
-        );
-
-        // add liquidity to stableswap with USDC and USDT balance of the sc
-        self.stableswap_contract(swap_sc)
-            .add_liquidity(
-                self.blockchain().get_sc_balance(
-                    &first_token,
-                    0),
-                self.blockchain().get_sc_balance(
-                    &second_token,
-                    0),
-                self.sc().get())
-            .with_multi_token_transfer(payments)   
-            .execute_on_dest_context();
-
-        // enter farm with LPUSDCUSDT
-        // you have to send the amount of LP you want to enterFarm with 
-        // + the amount of FUU-0cf97f you have 
-
-        let mut payments_enter_farm: ManagedVec<EsdtTokenPayment<Self::Api>> = ManagedVec::new();
-
-        // create payment tokens for entering farm
-        let lp_token_clone = lp_token_id.clone();
-        payments_enter_farm.push(
-            EsdtTokenPayment::new(
-                lp_token_id,
-                0,
-                self.blockchain().get_esdt_balance(
-                    &self.blockchain().get_sc_address(),
-                    &lp_token_clone,
-                    0
-                )
-            )
-        );
-
-        // retrieve the token that have been sent to you before for entering farm
-        // set a farm token for the specific farm address if empty, does not have to be the correct ticker but nonce should be zero
-        // with nonce zero, it will NOT be pushed as a payment token
-        self.farm_token_infos(target_farm_sc.clone()).set_if_empty(
-            &EsdtTokenPayment::new(
-                lp_token_clone,
-                0,
-                BigUint::zero()
-            )
-        );
-
-        // get the farm token informations
-        let farm_token = self.farm_token_infos(target_farm_sc.clone()).get();
-
-        // only push this paymentToken if the nonce is != 0 (nonce at the contract deployment)
-        if farm_token.token_nonce != 0 {
-            payments_enter_farm.push(farm_token);
-        }
-
-        // enter farm with LPT and send FUU to the contract
-        let result_farm_entering: EnterFarmResultType<Self::Api> = self.farm_contract(target_farm_sc.clone())
-            .enter_farm()
-            .with_multi_token_transfer(payments_enter_farm)
-            .execute_on_dest_context_custom_range(|_, after| (after - 1, after));
-        
-        // store new farm token
-        self.farm_token_infos(target_farm_sc.clone()).set(&result_farm_entering);
+        // store lp token for the swap
+        self.swap_lp_token_id(swap_sc).set(&lp_token_id);
     }
 
     #[endpoint(compound)]
@@ -414,12 +376,21 @@ pub trait CompoundContract {
         payment_amount_btc = payment_amount_btc / BigUint::from(1_000u64); // 49.5% 
 
         // swap the wbtc to btc
-        self.exchange(
-            btc_swap.clone(), 
-            btc_id.clone(), 
-            0, 
-            wbtc_id.clone(), 
-            payment_amount_btc);
+        // self.exchange(
+        //     btc_swap.clone(), 
+        //     btc_id.clone(), 
+        //     0, 
+        //     wbtc_id.clone(), 
+        //     payment_amount_btc);
+
+        self.stableswap_contract(btc_swap.clone())
+            .exchange(btc_id.clone(), 0)
+            .add_token_transfer(
+                wbtc_id.clone(),
+                0,
+                payment_amount_btc
+            )
+            .execute_on_dest_context();
 
         // 6. add liquidity and enter farm
 
@@ -501,25 +472,26 @@ pub trait CompoundContract {
         self.farm_token_infos(farm_sc).set(&new_farm_token_infos);
     }
 
-    #[payable("*")]
-    #[endpoint(increaseAmount)]
-    fn increase_amount(
-        &self,
-        #[payment_token] payment_token: TokenIdentifier,
-        #[payment_amount] payment_amount: BigUint
-    ) {
-        let governance_sc_address = self.governance_sc_address().get();
 
-        self.send().direct_with_gas_limit(
-            &governance_sc_address,
-            &payment_token,
-            0,
-            &payment_amount,
-            100_000_000,
-            ManagedBuffer::new_from_bytes("increaseAmount".as_bytes()),
-            &[]
-        )
-    }
+    // #[payable("*")]
+    // #[endpoint(increaseAmount)]
+    // fn increase_amount(
+    //     &self,
+    //     #[payment_token] payment_token: TokenIdentifier,
+    //     #[payment_amount] payment_amount: BigUint
+    // ) {
+    //     let governance_sc_address = self.governance_sc_address().get();
+
+    //     self.send().direct_with_gas_limit(
+    //         &governance_sc_address,
+    //         &payment_token,
+    //         0,
+    //         &payment_amount,
+    //         100_000_000,
+    //         ManagedBuffer::new_from_bytes("increaseAmount".as_bytes()),
+    //         &[]
+    //     )
+    // }
 
     // view 
 
@@ -567,6 +539,95 @@ pub trait CompoundContract {
             .execute_on_dest_context();
     }
 
+    fn add_liquidity_and_enter_farm_when_compounding(
+        &self,
+        swap_sc: ManagedAddress,
+        target_farm_sc: ManagedAddress,
+        lp_token_id: TokenIdentifier,
+        first_token: TokenIdentifier,
+        second_token: TokenIdentifier,
+    ) {
+
+        let mut payments = ManagedVec::new();
+        // push first token that is the token out when swapping from ash (is likely USDT)
+        payments.push(
+            EsdtTokenPayment::new(
+                first_token.clone(),
+                0,
+                self.blockchain().get_sc_balance(&first_token, 0)
+            )
+        );
+        // add USDC
+        payments.push(
+            EsdtTokenPayment::new(
+                second_token.clone(),
+                0,
+                self.blockchain().get_sc_balance(&second_token, 0)
+            )
+        );
+
+        // add liquidity to stableswap with USDC and USDT balance of the sc
+        self.stableswap_contract(swap_sc)
+            .add_liquidity(
+                self.blockchain().get_sc_balance(
+                    &first_token,
+                    0),
+                self.blockchain().get_sc_balance(
+                    &second_token,
+                    0),
+                self.sc().get())
+            .with_multi_token_transfer(payments)   
+            .execute_on_dest_context();
+
+        // enter farm with LPUSDCUSDT
+        // you have to send the amount of LP you want to enterFarm with 
+        // + the amount of FUU-0cf97f you have 
+
+        let mut payments_enter_farm: ManagedVec<EsdtTokenPayment<Self::Api>> = ManagedVec::new();
+
+        // create payment tokens for entering farm
+        let lp_token_clone = lp_token_id.clone();
+        payments_enter_farm.push(
+            EsdtTokenPayment::new(
+                lp_token_id,
+                0,
+                self.blockchain().get_esdt_balance(
+                    &self.blockchain().get_sc_address(),
+                    &lp_token_clone,
+                    0
+                )
+            )
+        );
+
+        // retrieve the token that have been sent to you before for entering farm
+        // set a farm token for the specific farm address if empty, does not have to be the correct ticker but nonce should be zero
+        // with nonce zero, it will NOT be pushed as a payment token
+        self.farm_token_infos(target_farm_sc.clone()).set_if_empty(
+            &EsdtTokenPayment::new(
+                lp_token_clone,
+                0,
+                BigUint::zero()
+            )
+        );
+
+        // get the farm token informations
+        let farm_token = self.farm_token_infos(target_farm_sc.clone()).get();
+
+        // only push this paymentToken if the nonce is != 0 (nonce at the contract deployment)
+        if farm_token.token_nonce != 0 {
+            payments_enter_farm.push(farm_token);
+        }
+
+        // enter farm with LPT and send FUU to the contract
+        let result_farm_entering: EnterFarmResultType<Self::Api> = self.farm_contract(target_farm_sc.clone())
+            .enter_farm()
+            .with_multi_token_transfer(payments_enter_farm)
+            .execute_on_dest_context_custom_range(|_, after| (after - 1, after));
+        
+        // store new farm token
+        self.farm_token_infos(target_farm_sc.clone()).set(&result_farm_entering);
+    }
+
     fn claim_rewards_in_contract(
         &self,
         target_farm_sc: ManagedAddress, // we provide the farm sc in args in order to create versatile functions
@@ -599,6 +660,10 @@ pub trait CompoundContract {
 
     #[storage_mapper("sc")]
     fn sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getSwapLpTokenId)]
+    #[storage_mapper("swap_lp_token_id")]
+    fn swap_lp_token_id(&self, addr: ManagedAddress) -> SingleValueMapper<TokenIdentifier>;
 
     #[view(getFarmTokenInfos)]
     #[storage_mapper("farm_token_infos")]
